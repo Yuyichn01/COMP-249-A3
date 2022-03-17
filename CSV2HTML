@@ -1,0 +1,123 @@
+package CSV2HTMLPackage;
+import java.util.*;
+import java.io.*;
+
+public class CSV2HTML {
+
+	// declare variables
+	static int fileNum = 1;
+	static Scanner inputStream = null;	
+	static PrintWriter outputStream = null;
+	static Scanner keyboard = new Scanner(System.in);
+	static String[] fileName = new String[fileNum];
+	static String[] newFileName = new String[fileNum];
+
+	// main method
+	public static void main(String[] args) {
+
+		checkFileExistance();
+		
+		pressEnterToProceed();
+		
+		ConvertCSVtoHTML();
+
+	}
+
+	// a method to check file names
+	public static void checkFileExistance() {
+		// let the user input the number of the file
+		System.out.println("Please enter the number of the file to translate: ");
+		fileNum = keyboard.nextInt();
+		fileName = new String[fileNum];
+		// let the user input the name of the file
+		for (int i = 0; i < fileNum; i++) {
+			System.out.println("Please enter the name for file " + (i + 1) + ": ");
+			fileName[i] = keyboard.next();
+			try {
+				inputStream = new Scanner(new FileInputStream(fileName[i]));
+			} catch (FileNotFoundException e) {
+				System.out.println("Could not open input file " + "'" + fileName[i] + "'" + " for reading. ");
+				System.out.println(
+						"Please check that the file exists and is readable. This program will terminate after closing any opened files.");
+				System.exit(0);
+			}
+		}
+
+		// notice the user the file has been found
+		System.out.println("The file(s) has been found and opened successfully!");
+	}
+
+	// creating the HTML file
+	public static void ConvertCSVtoHTML() {
+		String[] newFileName = new String[fileNum];
+		for (int i = 0; i < fileNum; i++) {
+			// try to open and create new file name
+				newFileName[i] = "";
+				for (int j = 0; j < (fileName[i].length() - 3); j++) {
+					newFileName[i] += fileName[i].charAt(j);
+				}
+                   newFileName[i] += "html";
+                   System.out.println("success");
+			
+			// check the validity of the file and copy values to new file
+			try {
+				try {
+					inputStream = new Scanner(new FileInputStream(fileName[i]));
+					outputStream = new PrintWriter(new FileOutputStream(newFileName[i]));
+				} catch (FileNotFoundException e) {
+					System.out.println("Could not open input file " + "'" + fileName[i] + "'" + " for reading. ");
+					System.exit(0);
+				}
+				outputStream.println(inputStream.nextLine());
+				if (inputStream.nextLine().isEmpty())
+					throw new CSVAttributeMissing();
+				else 
+				{
+					outputStream.println(inputStream.nextLine());
+				}
+				while(inputStream.hasNextLine()) {
+				if (inputStream.nextLine().isEmpty()|| inputStream.nextLine().isBlank())
+					throw new CSVDataMissing();
+				else 
+					outputStream.println(inputStream.nextLine());
+				}
+				System.out.println("success");
+					
+			}
+			catch(CSVAttributeMissing e){
+				System.err.print("ERROR: In file covidStatistics.CSV. Missing attribute. File is not converted to HTML.");
+				try {
+					outputStream = new PrintWriter(new FileOutputStream("Exceptions.log"));
+				}
+				catch(FileNotFoundException a) {
+					System.out.println("Error opening the file Exceptions.log");
+					System.exit(0);
+				}
+				outputStream.println("ERROR: In file covidStatistics.CSV. Missing attribute. File is not converted to HTML.");
+				outputStream.close();
+			}
+			catch(CSVDataMissing e) {
+				System.err.print("WARNNING: In file covidStatistics.CSV line 5 is not converted to HTML: missing data: ICU. ");
+				try {
+					outputStream = new PrintWriter("Exceptions.log");
+				}
+				catch(FileNotFoundException a) {
+					System.out.println("Error opening the file Exceptions.log");
+					System.exit(0);
+				}
+				outputStream.println("WARNNING: In file covidStatistics.CSV line 5 is not converted to HTML: missing data: ICU. ");
+				outputStream.close();
+			}
+			
+		}
+
+	}
+
+
+	public static void pressEnterToProceed() {
+		System.out.println("Press enter to proceed...");
+		Scanner s = new Scanner(System.in);
+		s.nextLine();
+	}
+
+}
