@@ -62,31 +62,19 @@ public class CSV2HTML {
 
 			// check the validity of the file and copy values to new file
 			try {
-
 				try {
 					inputStream = new Scanner(new FileInputStream(fileName[i]));
 					outputStream = new PrintWriter(new FileOutputStream(newFileName[i]));
+					if (inputStream.nextLine().isBlank())
+						throw new CSVAttributeMissing();
+					if (inputStream.nextLine().isEmpty() || inputStream.nextLine().isBlank())
+						throw new CSVDataMissing();
+					inputStream = new Scanner(new FileInputStream(fileName[i]));
+
 				} catch (FileNotFoundException e) {
 					System.out.println("Could not open input file " + "'" + fileName[i] + "'" + " for reading. ");
 					System.exit(0);
 				}
-				if (inputStream.nextLine().isEmpty())
-					throw new CSVAttributeMissing();
-				else {
-					outputStream.println(inputStream.nextLine());
-				}
-
-				if (inputStream.nextLine().isEmpty() || inputStream.nextLine().isBlank())
-					throw new CSVDataMissing();
-				else
-
-				while (inputStream.hasNextLine()) {
-
-					outputStream.println(inputStream.nextLine());
-				
-				}
-				outputStream.close();
-				inputStream.close();
 
 			} catch (CSVAttributeMissing e) {
 				System.err
@@ -103,7 +91,7 @@ public class CSV2HTML {
 
 			} catch (CSVDataMissing e) {
 				System.err.print(
-						"WARNNING: In file covidStatistics.CSV line 5 is not converted to HTML: missing data: ICU. ");
+						"WARNNING: In file covidStatistics.CSV line 5 is not converted to HTML: missing data: ICU.");
 				try {
 					outputStream = new PrintWriter("Exceptions.log");
 				} catch (FileNotFoundException a) {
@@ -111,10 +99,18 @@ public class CSV2HTML {
 					System.exit(0);
 				}
 				outputStream.println(
-						"WARNNING: In file covidStatistics.CSV line 5 is not converted to HTML: missing data: ICU. ");
+						"WARNNING: In file covidStatistics.CSV line 5 is not converted to HTML: missing data: ICU.");
 				outputStream.close();
 
 			}
+
+			// change format to HTML
+			while (inputStream.hasNextLine()) {
+				outputStream.println(inputStream.nextLine());
+			}
+
+			outputStream.close();
+			inputStream.close();
 
 		}
 
