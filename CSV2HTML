@@ -22,6 +22,8 @@ public class CSV2HTML {
 
 		ConvertCSVtoHTML();
 
+		closeAndExit();
+
 	}
 
 	// a method to check file names
@@ -40,15 +42,16 @@ public class CSV2HTML {
 				System.out.println("Could not open input file " + "'" + fileName[i] + "'" + " for reading. ");
 				System.out.println(
 						"Please check that the file exists and is readable. This program will terminate after closing any opened files.");
-				System.exit(0);
+				closeAndExit();
 			}
 		}
 
 		// notice the user the file has been found
+		System.out.println(" ");
 		System.out.println("The file(s) has been found and opened successfully!");
 	}
 
-	// creating the HTML file
+	// the core method to convert from csv to html
 	public static void ConvertCSVtoHTML() {
 		String[] newFileName = new String[fileNum];
 		for (int i = 0; i < fileNum; i++) {
@@ -57,8 +60,8 @@ public class CSV2HTML {
 			for (int j = 0; j < (fileName[i].length() - 3); j++) {
 				newFileName[i] += fileName[i].charAt(j);
 			}
-			newFileName[i] += "text";
-			System.out.println("success");
+			newFileName[i] += "html";
+			System.out.println("Successfully changed file " + (i + 1) + " from csv to html!");
 
 			// check the validity of the file and copy values to new file
 			try {
@@ -73,7 +76,7 @@ public class CSV2HTML {
 
 				} catch (FileNotFoundException e) {
 					System.out.println("Could not open input file " + "'" + fileName[i] + "'" + " for reading. ");
-					System.exit(0);
+					closeAndExit();
 				}
 
 			} catch (CSVAttributeMissing e) {
@@ -83,11 +86,11 @@ public class CSV2HTML {
 					outputStream = new PrintWriter(new FileOutputStream("Exceptions.log"));
 				} catch (FileNotFoundException a) {
 					System.out.println("Error opening the file Exceptions.log");
-					System.exit(0);
+					closeAndExit();
 				}
 				outputStream.println(
 						"ERROR: In file covidStatistics.CSV. Missing attribute. File is not converted to HTML.");
-				outputStream.close();
+				closeAndExit();
 
 			} catch (CSVDataMissing e) {
 				System.err.print(
@@ -96,24 +99,46 @@ public class CSV2HTML {
 					outputStream = new PrintWriter("Exceptions.log");
 				} catch (FileNotFoundException a) {
 					System.out.println("Error opening the file Exceptions.log");
-					System.exit(0);
 				}
 				outputStream.println(
 						"WARNNING: In file covidStatistics.CSV line 5 is not converted to HTML: missing data: ICU.");
-				outputStream.close();
-
+				closeAndExit();
 			}
 
 			// change format to HTML
-			while (inputStream.hasNextLine()) {
-				outputStream.println(inputStream.nextLine());
-			}
 
+			try {
+				BufferedReader reader = new BufferedReader(new FileReader(fileName[i]));
+				outputStream = new PrintWriter(new FileOutputStream(newFileName[i]));
+				outputStream.println("<!DOCTYPE html>\n" + "<html>\n" + "  <style>\n" + "  table {\n"
+						+ "    font-family: arial, Sans-Serif; border-collapse: collapse;\n" + "  }\n"
+						+ "  td, th {border: 1px solid #000000; text-align: left; padding: 8px;}\n"
+						+ "  tr: nth-child(even) {background-color: #dddddd;\n" + "  span{font-size: small}\n"
+						+ "  </style>\n" + "<table>\n");
+
+				String currentLine;
+				while ((currentLine = reader.readLine()) != null) {
+					outputStream.println("<tr>");
+					for (String field : currentLine.split(","))
+						outputStream.println("<td>" + field + "</td>");
+					outputStream.println("</tr>\n");
+				}
+
+				outputStream.println("</table></html>\n");
+
+			} catch (IOException e) {
+				closeAndExit();
+			}
 			outputStream.close();
 			inputStream.close();
-
+			pressEnterToProceed();
 		}
+	}
 
+	public static void closeAndExit() {
+		outputStream.close();
+		inputStream.close();
+		System.exit(0);
 	}
 
 	public static void pressEnterToProceed() {
@@ -122,4 +147,14 @@ public class CSV2HTML {
 		s.nextLine();
 	}
 
+	public static void welcomeMessage() {
+		
+
+	}
+
+	public static void endingMessage() {
+
+	}
+
 }
+
